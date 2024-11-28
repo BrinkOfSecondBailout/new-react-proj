@@ -4,6 +4,7 @@ import React, { ChangeEvent, useState } from 'react'
 const FileUploader = () => {
     const [file, setFile] = useState<File | null>(null);
     const [status, setStatus] = useState<UploadStatus>("idle");
+    const [uploadProgress, setUploadProgress] = useState<number>(0);
 
     type UploadStatus = "idle" | "uploading" | "success" | "error";
 
@@ -25,6 +26,9 @@ const FileUploader = () => {
             await axios.post("https://httpbin.org/post", formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
+                },
+                onUploadProgress: (progressEvent) => {
+                    
                 }
             });
 
