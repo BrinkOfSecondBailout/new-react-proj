@@ -1,3 +1,4 @@
+import { upload } from '@testing-library/user-event/dist/upload';
 import axios from 'axios';
 import React, { ChangeEvent, useState } from 'react'
 
@@ -12,12 +13,14 @@ const FileUploader = () => {
         if (e.target.files) {
             setFile(e.target.files[0]);
         }
+        setStatus("idle");
     }
 
     async function handleFileUpload() {
         if (!file) return;
 
         setStatus("uploading");
+        setUploadProgress(0);
 
         const formData = new FormData();
         formData.append("file", file);
@@ -28,13 +31,19 @@ const FileUploader = () => {
                     'Content-Type': 'multipart/form-data',
                 },
                 onUploadProgress: (progressEvent) => {
-                    
+                    const progress = progressEvent.total 
+                    ? Math.round((progressEvent.loaded * 100) / progressEvent.total)
+                    : 0;
+                    setUploadProgress(progress);
                 }
             });
 
             setStatus("success");
+            setUploadProgress(100);
+            setFile(null);
         } catch {
             setStatus("error");
+            setUploadProgress(0);
         }
 
     }
@@ -44,11 +53,17 @@ const FileUploader = () => {
             <input type="file" onChange={handleFileChange}/>
 
             {file && (
-                    <div>
-                        <p>Name: {file.name}</p>
-                        <p>Size: {(file.size / 1024).toFixed(2)} KB</p>
-                        <p>Type: {file.type}</p>
-                    </div>
+                <div>
+                    <p>Name: {file.name}</p>
+                    <p>Size: {(file.size / 1024).toFixed(2)} KB</p>
+                    <p>Type: {file.type}</p>
+                </div>
+            )}
+
+            {status === 'uploading' && (
+                <div>
+                    <p>{uploadProgress}% uploaded</p>
+                </div>
             )}
 
             {file && status !== "uploading" && (
